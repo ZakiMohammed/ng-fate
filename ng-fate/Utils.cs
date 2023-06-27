@@ -20,6 +20,21 @@ namespace ng_fate
             return filePath;
         }
 
+        public static async Task<List<string>> SearchInProject(string projectPathFull, string selector)
+        {
+            var files = Directory.GetFiles(projectPathFull, "*.html", SearchOption.AllDirectories);
+            var found = new List<string>();
+
+            foreach (var file in files)
+            {
+                var content = await File.ReadAllTextAsync(file);
+                if (content.Contains(selector))
+                    found.Add(file);
+            }
+
+            return found;
+        }
+
         public static string GetPascalCase(string name)
         {
             var parts = name.Split('.');

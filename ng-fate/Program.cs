@@ -4,29 +4,29 @@ try
 {
     Shell.WriteHeading();
 
-    var projectPath = string.Empty;
+    var projectPath = Shell.AcceptLine(Constants.MESSAGE_INPUT_PATH);
+    var projectPrefix = Shell.AcceptLine(Constants.MESSAGE_INPUT_PREFIX);
 
-    Console.ForegroundColor = ConsoleColor.Yellow;
-
-    Shell.Write(Constants.MESSAGE_INPUT_PATH);
-    Shell.ResetColor();
-    projectPath = Shell.ReadLine();
-
-    if (projectPath == null || projectPath.Trim() == string.Empty)
+    if (string.IsNullOrWhiteSpace(projectPath))
     {
         Shell.Error($"\n{Constants.MESSAGE_VALIDATION_ERROR}");
         return;
     }
+    if (string.IsNullOrWhiteSpace(projectPrefix))
+        projectPrefix = Constants.PATTERN_DEFAULT_PREFIX;
 
     var projectPathFull = projectPath + Constants.PATH_APP;
 
-    Console.WriteLine(Constants.MESSAGE_LOADING);
+    Console.WriteLine($"\n{Constants.MESSAGE_LOADING}");
 
     Business.ProjectPathFull = projectPathFull;
+    Business.ProjectPrefix = projectPrefix;
 
     await Business.ProcessModules(projectPathFull);
 
     Business.Print();
+
+    await Business.Save();
 }
 catch (Exception ex)
 {

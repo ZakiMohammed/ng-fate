@@ -9,12 +9,16 @@
             Console.ResetColor();
             Console.Write(value);
             Console.WriteLine();
+
+            Console.ResetColor();
         }
 
         public static void WriteKey(object? value)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(value);
+
+            Console.ResetColor();
         }
 
         public static void WriteHeading()
@@ -25,6 +29,8 @@
             Console.ResetColor();
             Console.WriteLine(Constants.MESSAGE_PUNCH_LINE);
             Console.WriteLine();
+
+            Console.ResetColor();
         }
 
         public static void Write(object? value)
@@ -41,6 +47,8 @@
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(value);
+
+            Console.ResetColor();
         }
 
         public static void EmptyLine()
@@ -51,6 +59,14 @@
         public static string? ReadLine()
         {
             return Console.ReadLine();
+        }
+
+        public static string? AcceptLine(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Write(message);
+            ResetColor();
+            return ReadLine();
         }
 
         public static void Clear()

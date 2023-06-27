@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace ng_fate
 {
@@ -6,12 +7,19 @@ namespace ng_fate
     {
         public static string ProjectPathFull { get; set; } = string.Empty;
 
+        public static string ProjectPrefix { get; set; } = string.Empty;
+
         public static List<Module> Modules { get; set; } = new List<Module>();
 
         public static void Print()
         {
             Shell.Clear();
             Shell.WriteHeading();
+
+            Shell.WriteKey("Modules:");
+            foreach (var module in Modules)
+                Shell.WriteLine($"\t{module.Name}");
+            Shell.EmptyLine();
 
             foreach (var module in Modules)
             {
@@ -26,10 +34,32 @@ namespace ng_fate
                     Shell.WriteKeyValue("\tFileName", component.FileName);
                     Shell.WriteKeyValue("\tFullPath", component.FilePath);
                     Shell.WriteKeyValue("\tRouted", component.Routed);
+                    Shell.WriteKeyValue("\tRoutePath", component.RoutePath);
+
+                    if (component.Parents != null && component.Parents.Count > 0)
+                    {
+                        Shell.WriteKey("\tParents:");
+                        foreach (var parent in component.Parents)
+                        {
+                            Shell.WriteKeyValue("\t\tName", parent.Name);
+                            Shell.WriteKeyValue("\t\tFileName", parent.FileName);
+                            Shell.WriteKeyValue("\t\tFullPath", parent.FilePath);
+                        }
+                    }
                 }
 
                 Shell.EmptyLine();
             }
+        }
+
+        public static async Task Save()
+        {
+            var content = JsonConvert.SerializeObject(Modules);
+
+            if (!Directory.Exists(Constants.OUTPUT_PATH))
+                Directory.CreateDirectory(Constants.OUTPUT_PATH);
+
+            await File.WriteAllTextAsync(Constants.OUTPUT_PATH_JSON, content);
         }
 
         public static async Task ProcessModules(string fullPath)
@@ -76,15 +106,21 @@ namespace ng_fate
             {
                 var fileName = GetMemberFileName(name);
                 var filePath = Utils.GetFilePath(ProjectPathFull, fileName);
-                var routed = await IsRouted(module.FilePath, name, filePath);
+                var routeDetail = await GetRouteDetail(module.FilePath, name, filePath);
 
-                components.Add(new Component
+                var component = new Component
                 {
                     Name = name,
                     FileName = fileName,
                     FilePath = filePath,
-                    Routed = routed
-                });
+                    Routed = routeDetail.Item1,
+                    RoutePath = routeDetail.Item2,
+                };
+
+                if (!component.Routed)
+                    await GetParentDetail(component);
+
+                components.Add(component);
             }
         }
 
@@ -117,27 +153,49 @@ namespace ng_fate
             }
         }
 
-        static async Task<bool> IsRouted(string modulePath, string name, string path)
+        static async Task GetParentDetail(Component component)
         {
-            bool routed;
-            var routingPath = modulePath.Replace(Constants.PATTERN_MODULE_EXTENSION, Constants.PATTERN_ROUTING_MODULE);
-            if (File.Exists(routingPath))
-                routed = await IsComponentPathExist(routingPath, name);
-            else
-                routed = await IsComponentPathExist(modulePath, name);
+            var selector = GetSelector(component.FileName);
+            var files = await Utils.SearchInProject(ProjectPathFull, selector);
 
-            if (!routed)
-                routed = await IsComponentPathExistInAppRouting(name, path);
+            if (files.Count < 1)
+                return;
 
-            return routed;
+            component.Parents = new List<Component>();
+
+            foreach (var file in files)
+            {
+                var fileInfo = new FileInfo(file);
+                component.Parents.Add(new Component
+                {
+                    Name = GetComponentName(fileInfo.Name),
+                    FileName = fileInfo.Name,
+                    FilePath = fileInfo.FullName,
+                });
+            }
         }
 
-        static async Task<bool> IsComponentPathExistInAppRouting(string name, string path)
+        static async Task<(bool, string)> GetRouteDetail(string modulePath, string name, string path)
+        {
+            (bool, string) detail;
+            var routingPath = modulePath.Replace(Constants.PATTERN_MODULE_EXTENSION, Constants.PATTERN_ROUTING_MODULE);
+            if (File.Exists(routingPath))
+                detail = await IsComponentPathExist(routingPath, name);
+            else
+                detail = await IsComponentPathExist(modulePath, name);
+
+            if (!detail.Item1)
+                detail = await IsComponentPathExistInAppRouting(name, path);
+
+            return detail;
+        }
+
+        static async Task<(bool, string)> IsComponentPathExistInAppRouting(string name, string path)
         {
             var appRoutingFilePath = ProjectPathFull + Constants.FILE_APP_ROUTING_MODULE;
 
             if (!File.Exists(appRoutingFilePath))
-                return false;
+                return (false, string.Empty);
 
             var content = await File.ReadAllTextAsync(appRoutingFilePath);
 
@@ -152,16 +210,81 @@ namespace ng_fate
                 .Trim();
             var importPattern = content.Contains(relativePath);
 
-            return routePattern && importPattern;
+            var pathExist = routePattern && importPattern;
+            var route = string.Empty;
+
+            if (pathExist)
+                route = await GetRoute(appRoutingFilePath, name);
+
+            return (pathExist, route);
         }
 
-        static async Task<bool> IsComponentPathExist(string routingFilePath, string name)
+        static async Task<(bool, string)> IsComponentPathExist(string routingFilePath, string name)
         {
             var content = await File.ReadAllTextAsync(routingFilePath);
             var routePattern1 = Constants.PATTERN_ROUTE_COMPONENT_COLON_SPACE + name;
             var routePattern2 = Constants.PATTERN_ROUTE_COMPONENT_COLON + name;
-            var routePattern = content.Contains(routePattern1) || content.Contains(routePattern2);
-            return routePattern;
+            var pathExist = content.Contains(routePattern1) || content.Contains(routePattern2);
+            var route = string.Empty;
+
+            if (pathExist)
+                route = await GetRoute(routingFilePath, name);
+
+            return (pathExist, route);
+        }
+
+        static async Task<string> GetRoute(string routingFilePath, string name)
+        {
+            var route = string.Empty;
+            var lines = await File.ReadAllLinesAsync(routingFilePath);
+
+            var routePattern1 = Constants.PATTERN_ROUTE_COMPONENT_COLON_SPACE + name;
+            var routePattern2 = Constants.PATTERN_ROUTE_COMPONENT_COLON + name;
+
+            for (int index = 0; index < lines.Length; index++)
+            {
+                var prevIndex = index - 1;
+                var current = lines[index];
+                var component = current.Contains(routePattern1) || current.Contains(routePattern2);
+
+                if (component)
+                {
+                    var path =
+                        current.Contains(Constants.PATTERN_ROUTE_PATH) ||
+                        current.Contains(Constants.PATTERN_ROUTE_PATH_SPACE);
+
+                    if (path)
+                        route = GetRouteFromPath(current);
+                    else if (index != 0)
+                    {
+                        var previous = lines[prevIndex];
+                        var prevPath =
+                            previous.Contains(Constants.PATTERN_ROUTE_PATH) ||
+                            previous.Contains(Constants.PATTERN_ROUTE_PATH_SPACE);
+
+                        if (prevPath)
+                            route = GetRouteFromPath(previous);
+                    }
+                }
+            }
+
+            return route;
+        }
+
+        static string GetRouteFromPath(string value)
+        {
+            var pattern = value.Contains(Constants.PATTERN_ROUTE_PATH_SPACE) ? Constants.PATTERN_PATH_ENCLOSED_QUOTS_SPACE : Constants.PATTERN_PATH_ENCLOSED_QUOTS;
+            var match = Regex.Match(value, pattern);
+
+            return match.Groups[1].Value;
+        }
+
+        static string GetSelector(string fileName)
+        {
+            var selector = fileName
+                .Replace(Constants.EXTENSION_TS, string.Empty)
+                .Replace(Constants.PATTERN_COMPONENT_DOT, string.Empty);
+            return $"{Constants.PATTERN_LESS_THAN}{ProjectPrefix}{Constants.PATTERN_DASH}{selector}";
         }
 
         static string GetMemberFileName(string name)
@@ -172,9 +295,20 @@ namespace ng_fate
                 .Replace(Constants.PATTERN_DIRECTIVE_DASH, Constants.PATTERN_DIRECTIVE_DOT) + Constants.EXTENSION_TS;
         }
 
+        static string GetComponentName(string name)
+        {
+            return Utils
+                .GetPascalCase(name.Replace(Constants.EXTENSION_HTML, string.Empty))
+                .Replace(Constants.PATTERN_DASH, string.Empty)
+                .Replace(Constants.PATTERN_COMPONENT_TWICE, Constants.PATTERN_COMPONENT);
+        }
+
         static string GetModuleName(string name)
         {
-            return Utils.GetPascalCase(name.Replace(Constants.EXTENSION_TS, string.Empty));
+            return Utils
+                .GetPascalCase(name.Replace(Constants.EXTENSION_TS, string.Empty))
+                .Replace(Constants.PATTERN_DASH, string.Empty)
+                .Replace(Constants.PATTERN_MODULE_TWICE, Constants.PATTERN_MODULE);
         }
     }
 }
