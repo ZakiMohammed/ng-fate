@@ -23,14 +23,18 @@
 
         public static void WriteHeading()
         {
-            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("-----------------------------------------------------------------------------------------------------------------");
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
 
             Console.WriteLine(Constants.MESSAGE_TITLE);
             Console.ResetColor();
-            Console.WriteLine(Constants.MESSAGE_PUNCH_LINE);
-            Console.WriteLine();
 
-            Console.ResetColor();
+            Console.WriteLine($"\n{Constants.MESSAGE_PUNCH_LINE}");
+            Console.WriteLine($"\n{Constants.MESSAGE_GITHUB_LINE}");
+
+            Console.WriteLine("-----------------------------------------------------------------------------------------------------------------");
+            Console.WriteLine();
         }
 
         public static void Write(object? value)

@@ -17,4 +17,11 @@
         public string RoutePath { get; set; }
         public List<Component> Parents { get; set; }
     }
+
+    public enum OutputType
+    {
+        Json = 1,
+        Cli = 2,
+        All = 3
+    }
 }

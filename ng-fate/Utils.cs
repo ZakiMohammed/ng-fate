@@ -20,7 +20,7 @@ namespace ng_fate
             return filePath;
         }
 
-        public static async Task<List<string>> SearchInProject(string projectPathFull, string selector)
+        public static async Task<List<string>> SearchInProject(string projectPathFull, IEnumerable<string> selectors)
         {
             var files = Directory.GetFiles(projectPathFull, "*.html", SearchOption.AllDirectories);
             var found = new List<string>();
@@ -28,7 +28,7 @@ namespace ng_fate
             foreach (var file in files)
             {
                 var content = await File.ReadAllTextAsync(file);
-                if (content.Contains(selector))
+                if (selectors.Any(selector => content.Contains(selector)))
                     found.Add(file);
             }
 
@@ -48,6 +48,11 @@ namespace ng_fate
         public static string GetKebabCase(string name)
         {
             return Regex.Replace(name, @"(\p{Ll})(\p{Lu})", "$1-$2").ToLower();
+        }
+
+        public static bool IsValidPrefix(string input)
+        {
+            return Regex.IsMatch(input, Constants.PATTERN_NO_SPECIAL_CHAR_ONLY_COMMA);
         }
     }
 }

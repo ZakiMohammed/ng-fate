@@ -5,13 +5,13 @@ A tool for deciding the fate of an Angular project. This will help you to find t
 Algorithm:
 
 1. get all '.module.ts' files [Done]
-2. get all 'declarations' array data from NgModules [Done]
-3. decompose fileName based on camelCasing of name [Done]
-4. get file path by search fileName in the directory [Done]
-5. read '*-routing.module.ts' file and search name of component if existed [Done]
-6. get the path name while searching for component in routing file [Done]
-7. search for 'header.component.html' file in entire project and get the .html parent files [Done]
-8. decompose fileName from name [Done]
+1. get all 'declarations' array data from NgModules [Done]
+1. decompose fileName based on camelCasing of name [Done]
+1. get file path by search fileName in the directory [Done]
+1. read '*-routing.module.ts' file and search name of component if existed [Done]
+1. get the path name while searching for component in routing file [Done]
+1. search for 'header.component.html' file in entire project and get the .html parent files [Done]
+1. decompose fileName from name [Done]
 
 Data Structure:
 
@@ -53,10 +53,9 @@ Data Structure:
 
 Todo:
 
-- Implement multiple selector
 - Implement .html output UI
 - Implement .html output UI accordian
 - Implement .html output UI search
-- Implement output directory selection from user logic
+- Exception handling
 - Optimize app performance
 - Deploy application

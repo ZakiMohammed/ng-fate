@@ -4,34 +4,56 @@ try
 {
     Shell.WriteHeading();
 
-    var projectPath = Shell.AcceptLine(Constants.MESSAGE_INPUT_PATH);
-    var projectPrefix = Shell.AcceptLine(Constants.MESSAGE_INPUT_PREFIX);
+    Business.ProjectPath = Shell.AcceptLine(Constants.MESSAGE_INPUT_PATH);
+    Business.ProjectPrefix = Shell.AcceptLine(Constants.MESSAGE_INPUT_PREFIX);
 
-    if (string.IsNullOrWhiteSpace(projectPath))
+    if (!Validators.IsProjectPathValid() ||
+        !Validators.IsProjectPrefixValid())
     {
         Shell.Error($"\n{Constants.MESSAGE_VALIDATION_ERROR}");
         return;
     }
-    if (string.IsNullOrWhiteSpace(projectPrefix))
-        projectPrefix = Constants.PATTERN_DEFAULT_PREFIX;
 
-    var projectPathFull = projectPath + Constants.PATH_APP;
+    Business.OutputTypeOption = Shell.AcceptLine(Constants.MESSAGE_INPUT_OUTPUT_TYPE);
 
-    Console.WriteLine($"\n{Constants.MESSAGE_LOADING}");
+    if (!Validators.IsOutputOptionValid())
+    {
+        Shell.Error($"\n{Constants.MESSAGE_VALIDATION_ERROR}");
+        return;
+    }
 
-    Business.ProjectPathFull = projectPathFull;
-    Business.ProjectPrefix = projectPrefix;
+    if (Business.OutputTypeValue != OutputType.Cli)
+    {
+        Business.OutputPath = Shell.AcceptLine(Constants.MESSAGE_INPUT_OUTPUT_PATH);
 
-    await Business.ProcessModules(projectPathFull);
+        if (!Validators.IsOutputPathValid())
+        {
+            Shell.Error($"\n{Constants.MESSAGE_VALIDATION_ERROR}");
+            return;
+        }
 
-    Business.Print();
+        Business.OutputPath = Business.OutputPath!.TrimEnd(Constants.PATTERN_BACKWARD_SLASH_CHAR);
+        Business.OutputPath += Constants.OUTPUT_PATH;
+    }
 
-    await Business.Save();
+    Console.WriteLine($"\n{Constants.MESSAGE_LOADING}\n");
+
+    await Business.ProcessModules(Business.ProjectPathFull);
+
+    if (Business.IsOptionAllOrCli())
+    {
+        Business.Print();
+    }
+
+    if (Business.IsOptionAllOrNonCli())
+    {
+        await Business.Save();
+    }
 }
 catch (Exception ex)
 {
     Console.ForegroundColor = ConsoleColor.Red;
 
-    Shell.Error($"\n{Constants.MESSAGE_EXCEPTION} - {ex.Message}");
+    Shell.Error($"\n{Constants.MESSAGE_EXCEPTION} - {ex.Message}\n");
     Shell.Error(ex.StackTrace);
 }

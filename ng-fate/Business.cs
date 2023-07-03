@@ -5,17 +5,22 @@ namespace ng_fate
 {
     static class Business
     {
-        public static string ProjectPathFull { get; set; } = string.Empty;
+        public static OutputType OutputTypeValue => (OutputType)Convert.ToInt32(OutputTypeOption);
 
-        public static string ProjectPrefix { get; set; } = string.Empty;
+        public static string? OutputTypeOption { get; set; } = string.Empty;
+
+        public static string? OutputPath { get; set; } = string.Empty;
+
+        public static string? ProjectPath { get; set; } = string.Empty;
+
+        public static string ProjectPathFull => ProjectPath + Constants.PATH_APP;
+
+        public static string? ProjectPrefix { get; set; } = string.Empty;
 
         public static List<Module> Modules { get; set; } = new List<Module>();
 
         public static void Print()
         {
-            Shell.Clear();
-            Shell.WriteHeading();
-
             Shell.WriteKey("Modules:");
             foreach (var module in Modules)
                 Shell.WriteLine($"\t{module.Name}");
@@ -56,10 +61,16 @@ namespace ng_fate
         {
             var content = JsonConvert.SerializeObject(Modules);
 
-            if (!Directory.Exists(Constants.OUTPUT_PATH))
-                Directory.CreateDirectory(Constants.OUTPUT_PATH);
+            if (!Directory.Exists(OutputPath!))
+                Directory.CreateDirectory(OutputPath!);
 
-            await File.WriteAllTextAsync(Constants.OUTPUT_PATH_JSON, content);
+            var file = $"{OutputPath!}{Constants.OUTPUT_PATH_JSON}";
+
+            await File.WriteAllTextAsync(file, content);
+
+            Shell.SetForegroundColor(ConsoleColor.Green);
+            Shell.WriteLine(Constants.MESSAGE_SUCCESS);
+            Shell.ResetColor();
         }
 
         public static async Task ProcessModules(string fullPath)
@@ -155,8 +166,8 @@ namespace ng_fate
 
         static async Task GetParentDetail(Component component)
         {
-            var selector = GetSelector(component.FileName);
-            var files = await Utils.SearchInProject(ProjectPathFull, selector);
+            var selectors = GetSelectors(component.FileName);
+            var files = await Utils.SearchInProject(ProjectPathFull, selectors);
 
             if (files.Count < 1)
                 return;
@@ -279,12 +290,17 @@ namespace ng_fate
             return match.Groups[1].Value;
         }
 
-        static string GetSelector(string fileName)
+        static IEnumerable<string> GetSelectors(string fileName)
+        {
+            return ProjectPrefixes().Select(prefix => GetSelector(fileName, prefix));
+        }
+
+        static string GetSelector(string fileName, string prefix)
         {
             var selector = fileName
                 .Replace(Constants.EXTENSION_TS, string.Empty)
                 .Replace(Constants.PATTERN_COMPONENT_DOT, string.Empty);
-            return $"{Constants.PATTERN_LESS_THAN}{ProjectPrefix}{Constants.PATTERN_DASH}{selector}";
+            return $"{Constants.PATTERN_LESS_THAN}{prefix}{Constants.PATTERN_DASH}{selector}";
         }
 
         static string GetMemberFileName(string name)
@@ -309,6 +325,21 @@ namespace ng_fate
                 .GetPascalCase(name.Replace(Constants.EXTENSION_TS, string.Empty))
                 .Replace(Constants.PATTERN_DASH, string.Empty)
                 .Replace(Constants.PATTERN_MODULE_TWICE, Constants.PATTERN_MODULE);
+        }
+
+        public static List<string> ProjectPrefixes()
+        {
+            return !string.IsNullOrWhiteSpace(ProjectPrefix) ? ProjectPrefix.Split(",").ToList() : new List<string>();
+        }
+
+        public static bool IsOptionAllOrCli()
+        {
+            return OutputTypeValue == OutputType.All || OutputTypeValue == OutputType.Cli;
+        }
+
+        public static bool IsOptionAllOrNonCli()
+        {
+            return OutputTypeValue == OutputType.All || OutputTypeValue != OutputType.Cli;
         }
     }
 }
