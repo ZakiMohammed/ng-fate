@@ -93,6 +93,7 @@ namespace ng_fate
                 var fileInfo = new FileInfo(file);
                 var module = new Module
                 {
+                    Id = Guid.NewGuid(),
                     Name = GetModuleName(fileInfo.Name),
                     FileName = fileInfo.Name,
                     FilePath = fileInfo.FullName,
@@ -121,6 +122,7 @@ namespace ng_fate
 
                 var component = new Component
                 {
+                    Id = Guid.NewGuid(),
                     Name = name,
                     FileName = fileName,
                     FilePath = filePath,
@@ -179,6 +181,7 @@ namespace ng_fate
                 var fileInfo = new FileInfo(file);
                 component.Parents.Add(new Component
                 {
+                    Id = Guid.NewGuid(),
                     Name = GetComponentName(fileInfo.Name),
                     FileName = fileInfo.Name,
                     FilePath = fileInfo.FullName,

@@ -9,10 +9,10 @@
 
         public const string FILE_APP_ROUTING_MODULE                 = "app-routing.module.ts";
 
-        public const string OUTPUT_PATH                             = "\\output";
-        public const string OUTPUT_PATH_JSON                        = "\\output.json";
-        public const string OUTPUT_PATH_JS                          = "\\output.js";
-        public const string OUTPUT_PATH_HTML                        = "\\output.html";
+        public const string OUTPUT_PATH                             = "\\ng-fate-output";
+        public const string OUTPUT_PATH_JSON                        = "\\ng-fate-output.json";
+        public const string OUTPUT_PATH_JS                          = "\\ng-fate-output.js";
+        public const string OUTPUT_PATH_HTML                        = "\\ng-fate-output.html";
 
         public const string MESSAGE_TITLE                           = "NgFate - Fate of Angular App";
         public const string MESSAGE_PUNCH_LINE                      = "A tool for providing reports on the Angular app structure, routes, dependencies and relations.";

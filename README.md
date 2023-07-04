@@ -53,9 +53,7 @@ Data Structure:
 
 Todo:
 
-- Implement .html output UI
-- Implement .html output UI accordian
-- Implement .html output UI search
+- Link .html output to output option
 - Exception handling
 - Optimize app performance
 - Deploy application
