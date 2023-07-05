@@ -14,6 +14,8 @@
         public const string OUTPUT_PATH_JS                          = "\\ng-fate-output.js";
         public const string OUTPUT_PATH_HTML                        = "\\ng-fate-output.html";
 
+        public const string CONTENT_JS_MODULES_VARIABLE             = "const _modules = ";
+
         public const string MESSAGE_TITLE                           = "NgFate - Fate of Angular App";
         public const string MESSAGE_PUNCH_LINE                      = "A tool for providing reports on the Angular app structure, routes, dependencies and relations.";
         public const string MESSAGE_GITHUB_LINE                     = "Please check the GitHub repository here: https://github.com/ZakiMohammed/ng-fate";
@@ -21,7 +23,7 @@
         public const string MESSAGE_SUCCESS                         = "Its over, its done!";
         public const string MESSAGE_INPUT_PATH                      = "Project Path: ";
         public const string MESSAGE_INPUT_PREFIX                    = "Project Prefix (comma separated): ";
-        public const string MESSAGE_INPUT_OUTPUT_TYPE               = "Select Output Type (1 - JSON, 2 - CLI, 3 - ALL): ";
+        public const string MESSAGE_INPUT_OUTPUT_TYPE               = "Select Output Type (1 - JSON, 2 - HTML, 3 - CLI, 4 - ALL): ";
         public const string MESSAGE_INPUT_OUTPUT_PATH               = "Output Folder Path: ";
         public const string MESSAGE_EXCEPTION                       = "Drowning! Fate is dark, can't save now!";
         public const string MESSAGE_VALIDATION_ERROR                = "Please be honest with your input!";

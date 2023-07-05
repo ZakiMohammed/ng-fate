@@ -47,7 +47,7 @@ namespace ng_fate
 
         public static string GetKebabCase(string name)
         {
-            return Regex.Replace(name, @"(\p{Ll})(\p{Lu})", "$1-$2").ToLower();
+            return Regex.Replace(name, @"(\p{Ll})(\p{Lu})|(\p{Lu})(\p{Lu})(\p{Ll})", "$1$3-$2$4$5").ToLower();
         }
 
         public static bool IsValidPrefix(string input)

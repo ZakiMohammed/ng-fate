@@ -64,9 +64,23 @@ namespace ng_fate
             if (!Directory.Exists(OutputPath!))
                 Directory.CreateDirectory(OutputPath!);
 
-            var file = $"{OutputPath!}{Constants.OUTPUT_PATH_JSON}";
+            if (OutputTypeValue == OutputType.Html || OutputTypeValue == OutputType.All)
+            {
+                var fileJs = $"{OutputPath!}{Constants.OUTPUT_PATH_JS}";
+                var contentJs = Constants.CONTENT_JS_MODULES_VARIABLE + content;
 
-            await File.WriteAllTextAsync(file, content);
+                var htmlContent = ResourceUtils.GetHtmlResourceContent();
+                var htmlFile = $"{OutputPath!}{Constants.OUTPUT_PATH_HTML}";
+
+                await File.WriteAllTextAsync(htmlFile, htmlContent);
+                await File.WriteAllTextAsync(fileJs, contentJs);
+            }
+
+            if (OutputTypeValue == OutputType.Json || OutputTypeValue == OutputType.All)
+            {
+                var fileJson = $"{OutputPath!}{Constants.OUTPUT_PATH_JSON}";
+                await File.WriteAllTextAsync(fileJson, content);
+            }
 
             Shell.SetForegroundColor(ConsoleColor.Green);
             Shell.WriteLine(Constants.MESSAGE_SUCCESS);

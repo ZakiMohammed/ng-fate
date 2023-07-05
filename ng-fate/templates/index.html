@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>🔮NgFate - Project Report</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        .accordion-button {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+    </style>
   </head>
   <body>
     <div class="container-fluid my-4">
@@ -47,7 +53,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="output.js"></script>
+    <script src="ng-fate-output.js"></script>
     <script>
       const dvReport = document.getElementById('report');
       const dvProject = document.getElementById('accord-project');
@@ -87,7 +93,7 @@
                                                 
                             <h2 class="accordion-header" id="header-${parent.Id}">
                                 <button
-                                    class="accordion-button collapsed"
+                                    class="accordion-button bg-danger-subtle border border-danger collapsed"
                                     type="button"
                                     data-bs-toggle="collapse"
                                     data-bs-target="#collapse-${parent.Id}"
@@ -102,7 +108,7 @@
                                 class="accordion-collapse collapse"
                                 aria-labelledby="header-${parent.Id}">
 
-                                <div class="accordion-body p-1">
+                                <div class="accordion-body border border-danger p-1">
                                     <ul class="list-group list-group-flush">
                                         <li class="list-group-item">
                                             <strong>Name:</strong>
@@ -139,7 +145,7 @@
                                         
                     <h2 class="accordion-header" id="header-${comp.Id}">
                         <button
-                            class="accordion-button collapsed"
+                            class="accordion-button bg-warning-subtle border border-warning collapsed"
                             type="button"
                             data-bs-toggle="collapse"
                             data-bs-target="#collapse-${comp.Id}"
@@ -154,7 +160,7 @@
                         class="accordion-collapse collapse"
                         aria-labelledby="header-${comp.Id}">
 
-                        <div class="accordion-body p-1">
+                        <div class="accordion-body border border-warning p-1">
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item">
                                     <strong>Name:</strong>
@@ -190,7 +196,7 @@
                     
                     <h2 class="accordion-header" id="header-${module.Id}">
                         <button
-                            class="accordion-button collapsed"
+                            class="accordion-button bg-success-subtle border border-success collapsed"
                             type="button"
                             data-bs-toggle="collapse"
                             data-bs-target="#collapse-${module.Id}"
@@ -205,7 +211,7 @@
                         class="accordion-collapse collapse"
                         aria-labelledby="header-${module.Id}">
 
-                        <div class="accordion-body p-1">
+                        <div class="accordion-body border border-success p-1">
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item">
                                     <strong>Name:</strong>

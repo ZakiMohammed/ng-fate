@@ -23,7 +23,8 @@
     public enum OutputType
     {
         Json = 1,
-        Cli = 2,
-        All = 3
+        Html,
+        Cli,
+        All
     }
 }

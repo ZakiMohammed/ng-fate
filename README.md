@@ -53,7 +53,5 @@ Data Structure:
 
 Todo:
 
-- Link .html output to output option
 - Exception handling
 - Optimize app performance
-- Deploy application
