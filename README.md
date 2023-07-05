@@ -2,6 +2,18 @@
 
 A tool for deciding the fate of an Angular project. This will help to provide reports on the Angular app structure, routes, dependencies and relations.
 
+NgFate - Project Report (HTML)
+
+![HTML](https://raw.githubusercontent.com/ZakiMohammed/ng-fate/master/ng-fate-html.png)
+
+NgFate - Project Report (CLI)
+
+![CLI](https://raw.githubusercontent.com/ZakiMohammed/ng-fate/master/ng-fate-cli.png)
+
+NgFate - Project Report (JSON)
+
+![JSON](https://raw.githubusercontent.com/ZakiMohammed/ng-fate/master/ng-fate-json.png)
+
 ## Download and Run
 
 - Download the app from the latest [Releases](https://github.com/ZakiMohammed/ng-fate/releases) section.
