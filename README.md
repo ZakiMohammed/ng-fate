@@ -2,17 +2,7 @@
 
 A tool for deciding the fate of an Angular project. This will help to provide reports on the Angular app structure, routes, dependencies and relations.
 
-NgFate - Project Report (HTML)
-
-![HTML](https://raw.githubusercontent.com/ZakiMohammed/ng-fate/master/ng-fate-html.png)
-
-NgFate - Project Report (CLI)
-
-![CLI](https://raw.githubusercontent.com/ZakiMohammed/ng-fate/master/ng-fate-cli.png)
-
-NgFate - Project Report (JSON)
-
-![JSON](https://raw.githubusercontent.com/ZakiMohammed/ng-fate/master/ng-fate-json.png)
+![NgFate Banner](https://raw.githubusercontent.com/ZakiMohammed/ng-fate/master/ng-fate-banner.jpg)
 
 ## Download and Run
 
@@ -66,6 +56,7 @@ Currently the NgFate is rookie and have to evolve a lot. For starter NgFate is l
 
 Check and verify if your app is adhering to these requirements:
 
+- NgFate doesn't support stand alone components yet.
 - The module and component naming must follow Angular guide.
 - Each module and component files must ends with the convention `*.module.ts` and `*.component.ts`.
 - Properly formatted declarations of components within @NgModule decorator (either in single line or new line).
