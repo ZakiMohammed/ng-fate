@@ -1,10 +1,10 @@
-# 🔮NgFate - Fate of Angular App
+# 🔮 NgFate - Fate of Angular App
 
 A tool for deciding the fate of an Angular project. This will help to provide reports on the Angular app structure, routes, dependencies and relations.
 
 ![NgFate Banner](https://raw.githubusercontent.com/ZakiMohammed/ng-fate/master/ng-fate-banner.jpg)
 
-## Download and Run
+## 🚚 Download and Run
 
 - Download the app from the latest [Releases](https://github.com/ZakiMohammed/ng-fate/releases) section.
 - Unzip the project in the directory of your choice
@@ -24,7 +24,7 @@ C:\Users\zshaikh>ng-fate.exe
 C:\Users\zshaikh>dotnet ng-fate.dll
 ```
 
-## Run Application
+## 🏃‍♂️ Run Application
 
 NgFate requires bunch of input from you in order to decide fate of your app.
 
@@ -50,7 +50,7 @@ Below gives detailing to these inputs:
     1. If you want all of the above select fourth option.
 - `Output Folder Path`: Path to your directory where you want all the output files to be generated.
 
-## Requirements
+## ⚠️ Requirements
 
 Currently the NgFate is rookie and have to evolve a lot. For starter NgFate is looking for some ideal structuring of the Angular project as per the Angular official document.
 
@@ -67,7 +67,7 @@ ___
 
 Below topics are for further read.
 
-## Algorithm:
+## 🧪 Algorithm:
 
 1. get all '.module.ts' files
 1. get all 'declarations' array data from NgModules
@@ -78,7 +78,7 @@ Below topics are for further read.
 1. search for 'header.component.html' file in entire project and get the .html parent files
 1. decompose fileName from name
 
-## Data Structure:
+## 🌳 Data Structure:
 
 ```
 [
