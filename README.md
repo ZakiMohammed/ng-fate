@@ -4,6 +4,14 @@ A tool for deciding the fate of an Angular project. This will help to provide re
 
 ![NgFate Banner](https://raw.githubusercontent.com/ZakiMohammed/ng-fate/master/ng-fate-banner.jpg)
 
+## 🍳 CodeOmelet - Blog Post
+
+Check out the CodeOmelet blog post for this project.
+
+Link: https://codeomelet.com/posts/ng-fate-a-tool-for-deciding-the-fate-of-an-angular-app
+
+___
+
 ## 🚚 Download and Run
 
 - Download the app from the latest [Releases](https://github.com/ZakiMohammed/ng-fate/releases) section.
@@ -50,11 +58,11 @@ Below gives detailing to these inputs:
     1. If you want all of the above select fourth option.
 - `Output Folder Path`: Path to your directory where you want all the output files to be generated.
 
-## ⚠️ Requirements
+## ⚠️ Limitations
 
 Currently the NgFate is rookie and have to evolve a lot. For starter NgFate is looking for some ideal structuring of the Angular project as per the Angular official document.
 
-Check and verify if your app is adhering to these requirements:
+Check and verify if your app is adhering to these limitations:
 
 - NgFate doesn't support stand alone components yet.
 - The module and component naming must follow Angular guide.
@@ -62,6 +70,17 @@ Check and verify if your app is adhering to these requirements:
 - Properly formatted declarations of components within @NgModule decorator (either in single line or new line).
 - Properly formatted routes configurations (path and component properties).
 - Prefix must be provided while providing the input to NgFate (it is case sensitive).
+
+## 🍷 Future Scope
+For the interstellar travel of NgFate below are some key features considered as a future scope for the tool:
+
+- Diagrams:
+  - Dependency graph in .html report.
+  - Routing graph in .html report.
+- Pipes and directives considerations.
+- Version Support: Adhering to the latest releases of Angular.
+- AI support for speeding up performance.
+- Fault tolerance and better logging.
 
 ___
 
