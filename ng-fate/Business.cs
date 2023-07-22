@@ -98,6 +98,8 @@ namespace ng_fate
 
             foreach (var folder in folders)
                 await ProcessModules(folder);
+
+            Modules = Modules.OrderBy(i => i.Name).ToList();
         }
 
         static async Task FeedModule(IEnumerable<string> files)
@@ -116,7 +118,7 @@ namespace ng_fate
 
                 await FeedComponents(module, components, file);
 
-                module.Components = components;
+                module.Components = components.OrderBy(i => i.Name).ToList();
 
                 Modules.Add(module);
             }
@@ -201,6 +203,8 @@ namespace ng_fate
                     FilePath = fileInfo.FullName,
                 });
             }
+
+            component.Parents = component.Parents.OrderBy(i => i.Name).ToList();
         }
 
         static async Task<(bool, string)> GetRouteDetail(string modulePath, string name, string path)
@@ -346,7 +350,7 @@ namespace ng_fate
 
         public static List<string> ProjectPrefixes()
         {
-            return !string.IsNullOrWhiteSpace(ProjectPrefix) ? ProjectPrefix.Split(",").ToList() : new List<string>();
+            return !string.IsNullOrWhiteSpace(ProjectPrefix) ? ProjectPrefix.Split(",").Select(i => i.Trim()).ToList() : new List<string>();
         }
 
         public static bool IsOptionAllOrCli()

@@ -63,7 +63,7 @@ namespace ng_fate.Properties {
         /// <summary>
         ///   Looks up a localized string similar to &lt;!DOCTYPE html&gt;
         ///&lt;html lang=&quot;en&quot;&gt;
-        ///  &lt;head&gt;
+        ///&lt;head&gt;
         ///    &lt;meta charset=&quot;utf-8&quot; /&gt;
         ///    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot; /&gt;
         ///    &lt;title&gt;🔮NgFate - Project Report&lt;/title&gt;
@@ -73,11 +73,10 @@ namespace ng_fate.Properties {
         ///            padding-top: 0.5rem;
         ///            padding-bottom: 0.5rem;
         ///        }
-        ///    &lt;/style&gt;
-        ///  &lt;/head&gt;
-        ///  &lt;body&gt;
-        ///    &lt;div class=&quot;container-fluid my-4&quot;&gt;
-        ///       [rest of string was truncated]&quot;;.
+        ///
+        ///        .mermaid {
+        ///            overflow: auto;
+        ///            border-radius: 0.5re [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string index {
             get {
