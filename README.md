@@ -14,10 +14,11 @@ ___
 
 ## 🚚 Download and Run
 
+- Download .NET if you don't have it already from here [Download .NET](https://dotnet.microsoft.com/en-us/download).
 - Download the app from the latest [Releases](https://github.com/ZakiMohammed/ng-fate/releases) section.
-- Unzip the project in the directory of your choice
-- Open terminal
-- Go to `publish` folder in the terminal
+- Unzip the project in the directory of your choice.
+- Open terminal.
+- Go to `publish` folder in the terminal:
 ```
 C:\Users\zshaikh>cd C:\Users\zshaikh\Downloads\publish
 ```
@@ -58,6 +59,14 @@ Below gives detailing to these inputs:
     1. If you want all of the above select fourth option.
 - `Output Folder Path`: Path to your directory where you want all the output files to be generated.
 
+Diagram:
+
+![NgFate - Diagram](https://codeomelet.com/Media/Images/posts/ng-fate-diagram.jpg)
+
+Watch a demo video here:
+
+https://codeomelet.com/Media/Images/posts/ng-fate-download-run-output.webm
+
 ## ⚠️ Limitations
 
 Currently the NgFate is rookie and have to evolve a lot. For starter NgFate is looking for some ideal structuring of the Angular project as per the Angular official document.
@@ -70,13 +79,11 @@ Check and verify if your app is adhering to these limitations:
 - Properly formatted declarations of components within @NgModule decorator (either in single line or new line).
 - Properly formatted routes configurations (path and component properties).
 - Prefix must be provided while providing the input to NgFate (it is case sensitive).
+- If Angular App's TypeScript files are not formatted with any formatters like Prettier or VS Code Default Formatter then NgFate might not work as expected. Make sure to format your application TypeScript files.
 
 ## 🍷 Future Scope
 For the interstellar travel of NgFate below are some key features considered as a future scope for the tool:
 
-- Diagrams:
-  - Dependency graph in .html report.
-  - Routing graph in .html report.
 - Pipes and directives considerations.
 - Version Support: Adhering to the latest releases of Angular.
 - AI support for speeding up performance.
