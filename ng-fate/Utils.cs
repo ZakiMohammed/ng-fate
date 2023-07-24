@@ -20,7 +20,7 @@ namespace ng_fate
             return filePath;
         }
 
-        public static async Task<List<string>> SearchInProject(string projectPathFull, IEnumerable<string> selectors)
+        public static async Task<List<string>> SearchComponentInProject(string projectPathFull, IEnumerable<string> selectors)
         {
             var files = Directory.GetFiles(projectPathFull, "*.html", SearchOption.AllDirectories);
             var found = new List<string>();

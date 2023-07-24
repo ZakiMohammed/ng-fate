@@ -1,5 +1,8 @@
 ﻿using Newtonsoft.Json;
+using System.ComponentModel;
+using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace ng_fate
 {
@@ -32,23 +35,52 @@ namespace ng_fate
                 Shell.WriteKeyValue("FileName", module.FileName);
                 Shell.WriteKeyValue("FilePath", module.FilePath);
 
-                Shell.WriteKey("Components:");
-                foreach (var component in module.Components)
+                if (module.Standalone)
                 {
-                    Shell.WriteKeyValue("\tName", component.Name);
-                    Shell.WriteKeyValue("\tFileName", component.FileName);
-                    Shell.WriteKeyValue("\tFullPath", component.FilePath);
-                    Shell.WriteKeyValue("\tRouted", component.Routed);
-                    Shell.WriteKeyValue("\tRoutePath", component.RoutePath);
+                    Shell.WriteKeyValue("Standalone", module.Standalone);
 
-                    if (component.Parents != null && component.Parents.Count > 0)
+                    if (module.Routed)
+                    {
+                        Shell.WriteKeyValue("Routed", module.Routed);
+                        Shell.WriteKeyValue("RoutePath", module.RoutePath);
+                    }
+
+                    if (module.Parents != null && module.Parents.Count > 0)
                     {
                         Shell.WriteKey("\tParents:");
-                        foreach (var parent in component.Parents)
+                        foreach (var parent in module.Parents)
                         {
                             Shell.WriteKeyValue("\t\tName", parent.Name);
                             Shell.WriteKeyValue("\t\tFileName", parent.FileName);
                             Shell.WriteKeyValue("\t\tFullPath", parent.FilePath);
+                        }
+                    }
+                }
+
+                if (module.Components != null)
+                {
+                    Shell.WriteKey("Components:");
+                    foreach (var component in module.Components)
+                    {
+                        Shell.WriteKeyValue("\tName", component.Name);
+                        Shell.WriteKeyValue("\tFileName", component.FileName);
+                        Shell.WriteKeyValue("\tFullPath", component.FilePath);
+
+                        if (component.Routed)
+                        {
+                            Shell.WriteKeyValue("\tRouted", component.Routed);
+                            Shell.WriteKeyValue("\tRoutePath", component.RoutePath);
+                        }
+
+                        if (component.Parents != null && component.Parents.Count > 0)
+                        {
+                            Shell.WriteKey("\tParents:");
+                            foreach (var parent in component.Parents)
+                            {
+                                Shell.WriteKeyValue("\t\tName", parent.Name);
+                                Shell.WriteKeyValue("\t\tFileName", parent.FileName);
+                                Shell.WriteKeyValue("\t\tFullPath", parent.FilePath);
+                            }
                         }
                     }
                 }
@@ -87,7 +119,16 @@ namespace ng_fate
             Shell.ResetColor();
         }
 
-        public static async Task ProcessModules(string fullPath)
+        public static async Task Run()
+        {
+            await ProcessModules(ProjectPathFull);
+
+            await ProcessStandaloneModules();
+
+            Modules = Modules.OrderBy(i => i.Standalone).ThenBy(i => i.Name).ToList();
+        }
+
+        static async Task ProcessModules(string fullPath)
         {
             bool isModule(string f) => f.Contains(Constants.PATTERN_MODULE_EXTENSION) && !f.Contains(Constants.PATTERN_ROUTING_MODULE);
             var files = Directory.GetFiles(fullPath).Where(isModule);
@@ -98,8 +139,47 @@ namespace ng_fate
 
             foreach (var folder in folders)
                 await ProcessModules(folder);
+        }
 
-            Modules = Modules.OrderBy(i => i.Name).ToList();
+        static async Task ProcessStandaloneModules()
+        {
+            var files = Directory.GetFiles(ProjectPathFull, "*.component.ts", SearchOption.AllDirectories);
+            var aloneModules = new List<string>();
+
+            var allComponents = Modules.SelectMany(module => module.Components).ToList();
+
+            foreach (var file in files)
+            {
+                if (allComponents.Exists(item => item.FilePath == file))
+                    continue;
+
+                var content = await File.ReadAllTextAsync(file);
+                if (content.Contains(Constants.CONTENT_STANDALONE_TRUE) || content.Contains(Constants.CONTENT_STANDALONE_TRUE_NO_SPACE))
+                    aloneModules.Add(file);
+            }
+
+            foreach (var aloneModule in aloneModules)
+            {
+                var name = Path.GetFileName(aloneModule);
+                var nameNoExtension = name.Replace(Constants.EXTENSION_TS, string.Empty);
+                var routeDetail = await GetRouteStandaloneDetail(nameNoExtension);
+
+                var module = new Module
+                {
+                    Id = Guid.NewGuid(),
+                    Name = GetComponentName(name, Constants.EXTENSION_TS),
+                    FileName = name,
+                    FilePath = aloneModule,
+                    Standalone = true,
+                    Routed = routeDetail.Item1,
+                    RoutePath = routeDetail.Item2
+                };
+
+                if (!routeDetail.Item1)
+                    await GetParentDetail(module);
+
+                Modules.Add(module);
+            }
         }
 
         static async Task FeedModule(IEnumerable<string> files)
@@ -185,7 +265,7 @@ namespace ng_fate
         static async Task GetParentDetail(Component component)
         {
             var selectors = GetSelectors(component.FileName);
-            var files = await Utils.SearchInProject(ProjectPathFull, selectors);
+            var files = await Utils.SearchComponentInProject(ProjectPathFull, selectors);
 
             if (files.Count < 1)
                 return;
@@ -198,13 +278,38 @@ namespace ng_fate
                 component.Parents.Add(new Component
                 {
                     Id = Guid.NewGuid(),
-                    Name = GetComponentName(fileInfo.Name),
+                    Name = GetComponentName(fileInfo.Name, Constants.EXTENSION_HTML),
                     FileName = fileInfo.Name,
                     FilePath = fileInfo.FullName,
                 });
             }
 
             component.Parents = component.Parents.OrderBy(i => i.Name).ToList();
+        }
+
+        static async Task GetParentDetail(Module module)
+        {
+            var selectors = GetSelectors(module.FileName);
+            var files = await Utils.SearchComponentInProject(ProjectPathFull, selectors);
+
+            if (files.Count < 1)
+                return;
+
+            module.Parents = new List<Component>();
+
+            foreach (var file in files)
+            {
+                var fileInfo = new FileInfo(file);
+                module.Parents.Add(new Component
+                {
+                    Id = Guid.NewGuid(),
+                    Name = GetComponentName(fileInfo.Name, Constants.EXTENSION_HTML),
+                    FileName = fileInfo.Name,
+                    FilePath = fileInfo.FullName,
+                });
+            }
+
+            module.Parents = module.Parents.OrderBy(i => i.Name).ToList();
         }
 
         static async Task<(bool, string)> GetRouteDetail(string modulePath, string name, string path)
@@ -218,6 +323,21 @@ namespace ng_fate
 
             if (!detail.Item1)
                 detail = await IsComponentPathExistInAppRouting(name, path);
+
+            return detail;
+        }
+
+        static async Task<(bool, string)> GetRouteStandaloneDetail(string name)
+        {
+            var files = Directory.GetFiles(ProjectPathFull, "*-routing.module.ts", SearchOption.AllDirectories);
+            (bool, string) detail = (false, string.Empty);
+
+            foreach (var file in files)
+            {
+                detail = await IsComponentStandalonePathExist(file, name);
+                if (detail.Item1)
+                    break;
+            }
 
             return detail;
         }
@@ -264,14 +384,25 @@ namespace ng_fate
 
             return (pathExist, route);
         }
+        
+        static async Task<(bool, string)> IsComponentStandalonePathExist(string routingFilePath, string fileName)
+        {
+            var content = await File.ReadAllTextAsync(routingFilePath);
+            var pathExist = content.Contains(Constants.PATTERN_ROUTE_COMPONENT_STANDALONE);
+            var route = string.Empty;
 
-        static async Task<string> GetRoute(string routingFilePath, string name)
+            if (pathExist)
+                route = await GetRoute(routingFilePath, fileName, true);
+
+            return (pathExist, route);
+        }
+
+        static async Task<string> GetRoute(string routingFilePath, string name, bool standalone = false)
         {
             var route = string.Empty;
             var lines = await File.ReadAllLinesAsync(routingFilePath);
 
-            var routePattern1 = Constants.PATTERN_ROUTE_COMPONENT_COLON_SPACE + name;
-            var routePattern2 = Constants.PATTERN_ROUTE_COMPONENT_COLON + name;
+            var (routePattern1, routePattern2) = GetRoutePatterns(name, standalone);
 
             for (int index = 0; index < lines.Length; index++)
             {
@@ -303,6 +434,25 @@ namespace ng_fate
             return route;
         }
 
+        static (string, string) GetRoutePatterns(string nameOrFileName, bool standalone)
+        {
+            string routePattern1;
+            string routePattern2;
+
+            if (!standalone)
+            {
+                routePattern1 = Constants.PATTERN_ROUTE_COMPONENT_COLON_SPACE + nameOrFileName;
+                routePattern2 = Constants.PATTERN_ROUTE_COMPONENT_COLON + nameOrFileName;
+            }
+            else
+            {
+                routePattern1 = $"/{nameOrFileName}').then(";
+                routePattern2 = routePattern1;
+            }
+
+            return (routePattern1, routePattern2);
+        }
+
         static string GetRouteFromPath(string value)
         {
             var pattern = value.Contains(Constants.PATTERN_ROUTE_PATH_SPACE) ? Constants.PATTERN_PATH_ENCLOSED_QUOTS_SPACE : Constants.PATTERN_PATH_ENCLOSED_QUOTS;
@@ -332,10 +482,10 @@ namespace ng_fate
                 .Replace(Constants.PATTERN_DIRECTIVE_DASH, Constants.PATTERN_DIRECTIVE_DOT) + Constants.EXTENSION_TS;
         }
 
-        static string GetComponentName(string name)
+        static string GetComponentName(string name, string extension)
         {
             return Utils
-                .GetPascalCase(name.Replace(Constants.EXTENSION_HTML, string.Empty))
+                .GetPascalCase(name.Replace(extension, string.Empty))
                 .Replace(Constants.PATTERN_DASH, string.Empty)
                 .Replace(Constants.PATTERN_COMPONENT_TWICE, Constants.PATTERN_COMPONENT);
         }

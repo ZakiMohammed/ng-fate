@@ -38,7 +38,7 @@ try
 
     Console.WriteLine($"\n{Constants.MESSAGE_LOADING}\n");
 
-    await Business.ProcessModules(Business.ProjectPathFull);
+    await Business.Run();
 
     if (Business.IsOptionAllOrCli())
     {

@@ -5,7 +5,7 @@
         public const string EXTENSION_TS                            = ".ts";
         public const string EXTENSION_HTML                          = ".html";
 
-        public const string PATH_APP                                = @"\src\\app\";
+        public const string PATH_APP                                = @"\src\app\";
 
         public const string FILE_APP_ROUTING_MODULE                 = "app-routing.module.ts";
 
@@ -15,6 +15,8 @@
         public const string OUTPUT_PATH_HTML                        = "\\ng-fate-output.html";
 
         public const string CONTENT_JS_MODULES_VARIABLE             = "const _modules = ";
+        public const string CONTENT_STANDALONE_TRUE                 = "standalone: true";
+        public const string CONTENT_STANDALONE_TRUE_NO_SPACE        = "standalone:true";
 
         public const string MESSAGE_TITLE                           = "NgFate - Fate of Angular App";
         public const string MESSAGE_PUNCH_LINE                      = "A tool for providing reports on the Angular app structure, routes, dependencies and relations.";
@@ -54,6 +56,7 @@
         public const char   PATTERN_BACKWARD_SLASH_CHAR             = '\\';
         public const string PATTERN_ROUTE_COMPONENT_COLON_SPACE     = "component: ";
         public const string PATTERN_ROUTE_COMPONENT_COLON           = "component:";
+        public const string PATTERN_ROUTE_COMPONENT_STANDALONE      = "loadComponent";
         public const string PATTERN_ROUTE_PATH_SPACE                = "path: ";
         public const string PATTERN_ROUTE_PATH                      = "path:";
         public const string PATTERN_MODULE_TWICE                    = "ModuleModule";
