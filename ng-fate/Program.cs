@@ -36,19 +36,30 @@ try
         Business.OutputPath += Constants.OUTPUT_PATH;
     }
 
-    Console.WriteLine($"\n{Constants.MESSAGE_LOADING}\n");
+    Business.StartTime = DateTime.Now;
+
+    Shell.EmptyLine();
+    Shell.Log(Constants.MESSAGE_LOADING);
 
     await Business.Run();
+
+    if (Business.IsOptionAllOrNonCli())
+    {
+        Shell.Log("Files are getting saved");
+
+        await Business.Save();
+    }
 
     if (Business.IsOptionAllOrCli())
     {
         Business.Print();
     }
 
-    if (Business.IsOptionAllOrNonCli())
-    {
-        await Business.Save();
-    }
+    Business.EndTime = DateTime.Now;
+
+    Shell.Finish();
+
+    Business.PrintStats();
 }
 catch (Exception ex)
 {

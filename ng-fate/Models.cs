@@ -8,6 +8,7 @@
         public string FilePath { get; set; }
         public bool Routed { get; set; }
         public string RoutePath { get; set; }
+        public string Selector { get; set; }
         public bool Standalone { get; set; } = false;
         public List<Component> Components { get; set; }
         public List<Component> Parents { get; set; }
@@ -21,6 +22,7 @@
         public string FilePath { get; set; }
         public bool Routed { get; set; }
         public string RoutePath { get; set; }
+        public string Selector { get; set; }
         public List<Component> Parents { get; set; }
     }
 

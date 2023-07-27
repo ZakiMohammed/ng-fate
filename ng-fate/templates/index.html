@@ -67,6 +67,7 @@
                         <ul class="dropdown-menu dropdown-menu-end dropdown-search">
                             <li><button class="dropdown-item" type="button">Module</button></li>
                             <li><button class="dropdown-item" type="button">Component</button></li>
+                            <li><button class="dropdown-item" type="button">Parents</button></li>
                         </ul>
                         <button id="btn-cancel" class="btn btn-outline-secondary" type="button">❌</button>
                     </div>
@@ -81,8 +82,8 @@
                         <h6>Diagram:</h6>
 
                         <pre id="mermaid" class="mermaid">
-                        <div id="mermaid-svg"></div>
-              </pre>
+                        <span id="mermaid-svg"></span>
+                        </pre>
                     </div>
                 </div>
             </div>
@@ -128,6 +129,8 @@
 
             for (const module of modules) {
                 let compContent = '';
+                let moduleParentContent = '';
+
                 if (module.Components) {
                     for (const comp of module.Components) {
                         let parentContent = '';
@@ -135,158 +138,255 @@
                             let parentCompContent = '';
                             for (const parent of comp.Parents) {
                                 parentCompContent += `
-                            <div class="accordion-item">
+                                        <div class="accordion-item">
 
-                                <h2 class="accordion-header" id="header-${parent.Id}">
-                                    <button
-                                        class="accordion-button bg-danger-subtle border border-danger collapsed"
-                                        type="button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#collapse-${parent.Id}"
-                                        aria-expanded="true"
-                                        aria-controls="collapse-${parent.Id}">
-                                        ${parent.Name}
-                                    </button>
-                                </h2>
+                                            <h2 class="accordion-header" id="header-${parent.Id}">
+                                                <button
+                                                    class="accordion-button bg-danger-subtle border border-danger collapsed"
+                                                    type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#collapse-${parent.Id}"
+                                                    aria-expanded="true"
+                                                    aria-controls="collapse-${parent.Id}">
+                                                    ${parent.Name}
+                                                </button>
+                                            </h2>
 
-                                <div
-                                    id="collapse-${parent.Id}"
-                                    class="accordion-collapse collapse"
-                                    aria-labelledby="header-${parent.Id}">
+                                            <div
+                                                id="collapse-${parent.Id}"
+                                                class="accordion-collapse collapse"
+                                                aria-labelledby="header-${parent.Id}">
 
-                                    <div class="accordion-body border border-danger p-1">
-                                        <ul class="list-group list-group-flush">
-                                            <li class="list-group-item">
-                                                <strong>Name:</strong>
-                                                <span>${parent.Name}</span>
-                                            </li>
-                                            <li class="list-group-item">
-                                                <strong>FileName:</strong>
-                                                <span>${parent.FileName}</span>
-                                            </li>
-                                            <li class="list-group-item">
-                                                <strong>FilePath:</strong>
-                                                <span>${parent.FilePath}</span>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
+                                                <div class="accordion-body border border-danger p-1">
+                                                    <ul class="list-group list-group-flush">
+                                                        <li class="list-group-item">
+                                                            <strong>Name:</strong>
+                                                            <span>${parent.Name}</span>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <strong>FileName:</strong>
+                                                            <span>${parent.FileName}</span>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <strong>FilePath:</strong>
+                                                            <span>${parent.FilePath}</span>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <strong>Selector:</strong>
+                                                            <span>${parent.Selector}</span>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
 
-                            </div>
-                        `;
+                                        </div>
+                                    `;
                             }
 
                             parentContent = `
-                          <li class="list-group-item">
-                              <strong>Parents:</strong>
-                              <div class="accordion mt-2">
-                                  ${parentCompContent}
-                              </div>
-                          </li>
-                      `;
+                                      <li class="list-group-item">
+                                          <strong>Parents:</strong>
+                                          <div class="accordion mt-2">
+                                              ${parentCompContent}
+                                          </div>
+                                      </li>
+                                  `;
                         }
 
                         compContent += `
-                        <div class="accordion-item">
+                                    <div class="accordion-item">
 
-                            <h2 class="accordion-header" id="header-${comp.Id}">
-                                <button
-                                    class="accordion-button bg-warning-subtle border border-warning collapsed"
-                                    type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#collapse-${comp.Id}"
-                                    aria-expanded="true"
-                                    aria-controls="collapse-${comp.Id}">
-                                    ${comp.Name}
-                                </button>
-                            </h2>
+                                        <h2 class="accordion-header" id="header-${comp.Id}">
+                                            <button
+                                                class="accordion-button bg-warning-subtle border border-warning collapsed"
+                                                type="button"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#collapse-${comp.Id}"
+                                                aria-expanded="true"
+                                                aria-controls="collapse-${comp.Id}">
+                                                ${comp.Name}
+                                            </button>
+                                        </h2>
 
-                            <div
-                                id="collapse-${comp.Id}"
-                                class="accordion-collapse collapse"
-                                aria-labelledby="header-${comp.Id}">
+                                        <div
+                                            id="collapse-${comp.Id}"
+                                            class="accordion-collapse collapse"
+                                            aria-labelledby="header-${comp.Id}">
 
-                                <div class="accordion-body border border-warning p-1">
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item">
-                                            <strong>Name:</strong>
-                                            <span>${comp.Name}</span>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <strong>FileName:</strong>
-                                            <span>${comp.FileName}</span>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <strong>FilePath:</strong>
-                                            <span>${comp.FilePath}</span>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <strong>Routed:</strong>
-                                            <span>${comp.Routed}</span>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <strong>RoutePath:</strong>
-                                            <span>${comp.RoutePath}</span>
-                                        </li>
-                                        ${parentContent}
-                                    </ul>
-                                </div>
-                            </div>
+                                            <div class="accordion-body border border-warning p-1">
+                                                <ul class="list-group list-group-flush">
+                                                    <li class="list-group-item">
+                                                        <strong>Name:</strong>
+                                                        <span>${comp.Name}</span>
+                                                    </li>
+                                                    <li class="list-group-item">
+                                                        <strong>FileName:</strong>
+                                                        <span>${comp.FileName}</span>
+                                                    </li>
+                                                    <li class="list-group-item">
+                                                        <strong>FilePath:</strong>
+                                                        <span>${comp.FilePath}</span>
+                                                    </li>
+                                                    <li class="list-group-item">
+                                                        <strong>Selector:</strong>
+                                                        <span>${comp.Selector}</span>
+                                                    </li>
+                                                    <li class="list-group-item">
+                                                        <strong>Routed:</strong>
+                                                        <span>${comp.Routed}</span>
+                                                    </li>
 
-                        </div>
-                    `;
+                                                    ${comp.Routed
+                                ? `
+                                                          <li class="list-group-item">
+                                                              <strong>RoutePath:</strong>
+                                                              <span>${comp.RoutePath}</span>
+                                                          </li>
+                                                        `
+                                : parentContent
+                            }
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                `;
+                    }
+                }
+
+                if (module.Standalone) {
+                    if (module.Parents) {
+                        let moduleParentCompContent = '';
+                        for (const parent of module.Parents) {
+                            moduleParentCompContent += `
+                                        <div class="accordion-item">
+
+                                            <h2 class="accordion-header" id="header-${parent.Id}">
+                                                <button
+                                                    class="accordion-button bg-danger-subtle border border-danger collapsed"
+                                                    type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#collapse-${parent.Id}"
+                                                    aria-expanded="true"
+                                                    aria-controls="collapse-${parent.Id}">
+                                                    ${parent.Name}
+                                                </button>
+                                            </h2>
+
+                                            <div
+                                                id="collapse-${parent.Id}"
+                                                class="accordion-collapse collapse"
+                                                aria-labelledby="header-${parent.Id}">
+
+                                                <div class="accordion-body border border-danger p-1">
+                                                    <ul class="list-group list-group-flush">
+                                                        <li class="list-group-item">
+                                                            <strong>Name:</strong>
+                                                            <span>${parent.Name}</span>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <strong>FileName:</strong>
+                                                            <span>${parent.FileName}</span>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <strong>FilePath:</strong>
+                                                            <span>${parent.FilePath}</span>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <strong>Selector:</strong>
+                                                            <span>${parent.Selector}</span>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    `;
+                        }
+
+                        moduleParentContent = `
+                                      <li class="list-group-item">
+                                          <strong>Parents:</strong>
+                                          <div class="accordion mt-2">
+                                              ${moduleParentCompContent}
+                                          </div>
+                                      </li>
+                                  `;
                     }
                 }
 
                 dvProject.innerHTML += `
-                      <div class="accordion-item">
+                                  <div class="accordion-item">
 
-                          <h2 class="accordion-header" id="header-${module.Id}">
-                              <button
-                                  class="accordion-button ${module.Standalone ? 'bg-info-subtle' : 'bg-success-subtle'
+                                      <h2 class="accordion-header" id="header-${module.Id}">
+                                          <button
+                                              class="accordion-button ${module.Standalone ? 'bg-info-subtle' : 'bg-success-subtle'
                     } border ${module.Standalone ? 'border-info' : 'border-success'} collapsed"
-                                  type="button"
-                                  data-bs-toggle="collapse"
-                                  data-bs-target="#collapse-${module.Id}"
-                                  aria-expanded="true"
-                                  aria-controls="collapse-${module.Id}">
-                                  ${module.Name}
-                              </button>
-                          </h2>
+                                              type="button"
+                                              data-bs-toggle="collapse"
+                                              data-bs-target="#collapse-${module.Id}"
+                                              aria-expanded="true"
+                                              aria-controls="collapse-${module.Id}">
+                                              ${module.Name}
+                                          </button>
+                                      </h2>
 
-                          <div
-                              id="collapse-${module.Id}"
-                              class="accordion-collapse collapse"
-                              aria-labelledby="header-${module.Id}">
+                                      <div
+                                          id="collapse-${module.Id}"
+                                          class="accordion-collapse collapse"
+                                          aria-labelledby="header-${module.Id}">
 
-                              <div class="accordion-body border border-success p-1">
-                                  <ul class="list-group list-group-flush">
-                                      <li class="list-group-item">
-                                          <strong>Name:</strong>
-                                          <span>${module.Name}</span>
-                                      </li>
-                                      <li class="list-group-item">
-                                          <strong>FileName:</strong>
-                                          <span>${module.FileName}</span>
-                                      </li>
-                                      <li class="list-group-item">
-                                          <strong>FilePath:</strong>
-                                          <span>${module.FilePath}</span>
-                                      </li>
-                                      ${module.Components ?
-                        `
-                                          <li class="list-group-item">
-                                              <strong>Components:</strong>
-                                              <div class="accordion mt-2">
-                                                  ${compContent}
-                                              </div>
-                                          </li>` :
-                        ''}
-                                  </ul>
-                              </div>
-                          </div>
-                      </div>
-                  `;
+                                          <div class="accordion-body border border-success p-1">
+                                              <ul class="list-group list-group-flush">
+                                                  <li class="list-group-item">
+                                                      <strong>Name:</strong>
+                                                      <span>${module.Name}</span>
+                                                  </li>
+                                                  <li class="list-group-item">
+                                                      <strong>FileName:</strong>
+                                                      <span>${module.FileName}</span>
+                                                  </li>
+                                                  <li class="list-group-item">
+                                                      <strong>FilePath:</strong>
+                                                      <span>${module.FilePath}</span>
+                                                  </li>
+                                                  ${module.Standalone
+                        ? `
+                                                        <li class="list-group-item">
+                                                            <strong>Selector:</strong>
+                                                            <span>${module.Selector}</span>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <strong>Routed:</strong>
+                                                            <span>${module.Routed}</span>
+                                                        </li>
+                                                        ${module.Routed
+                            ? `
+                                                              <li class="list-group-item">
+                                                                  <strong>RoutePath:</strong>
+                                                                  <span>${module.RoutePath}</span>
+                                                              </li>
+                                                            `
+                            : moduleParentContent
+                        }
+                                                      `
+                        : ''
+                    }
+                                                  ${module.Components
+                        ? `
+                                                      <li class="list-group-item">
+                                                          <strong>Components:</strong>
+                                                          <div class="accordion mt-2">
+                                                              ${compContent}
+                                                          </div>
+                                                      </li>`
+                        : ''
+                    }
+                                              </ul>
+                                          </div>
+                                      </div>
+                                  </div>
+                              `;
             }
         }
 
@@ -351,7 +451,40 @@
             if (type === 'Component') {
                 const clonedModules = structuredClone(_modules);
                 modules = clonedModules.filter(module => {
+                    if (module.Components === null) {
+                        return false;
+                    }
+
                     const foundComps = module.Components.filter(comp => comp.Name.toLowerCase().includes(search));
+
+                    if (foundComps && foundComps.length) {
+                        module.Components = foundComps;
+                        return true;
+                    }
+
+                    return false;
+                });
+            } else if (type === 'Parents') {
+                const clonedModules = structuredClone(_modules);
+                modules = clonedModules.filter(module => {
+                    if (module.Components === null) {
+                        return false;
+                    }
+
+                    const foundComps = module.Components.filter(comp => {
+                        if (comp.Parents === null) {
+                            return false;
+                        }
+
+                        const foundParents = comp.Parents.filter(parent => parent.Name.toLowerCase().includes(search));
+
+                        if (foundParents && foundParents.length) {
+                            comp.Parents = foundParents;
+                            return true;
+                        }
+
+                        return false;
+                    });
 
                     if (foundComps && foundComps.length) {
                         module.Components = foundComps;

@@ -1,13 +1,14 @@
 ﻿using Newtonsoft.Json;
-using System.ComponentModel;
-using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 
 namespace ng_fate
 {
     static class Business
     {
+        public static DateTime StartTime { get; set; }
+
+        public static DateTime EndTime { get; set; }
+
         public static OutputType OutputTypeValue => (OutputType)Convert.ToInt32(OutputTypeOption);
 
         public static string? OutputTypeOption { get; set; } = string.Empty;
@@ -24,62 +25,64 @@ namespace ng_fate
 
         public static void Print()
         {
-            Shell.WriteKey("Modules:");
+            Shell.EmptyLine();
+
+            Shell.WriteKey(Constants.KEY_MODULES);
             foreach (var module in Modules)
                 Shell.WriteLine($"\t{module.Name}");
             Shell.EmptyLine();
 
             foreach (var module in Modules)
             {
-                Shell.WriteKeyValue("Name", module.Name);
-                Shell.WriteKeyValue("FileName", module.FileName);
-                Shell.WriteKeyValue("FilePath", module.FilePath);
+                Shell.WriteKeyValue(Constants.KEY_NAME, module.Name);
+                Shell.WriteKeyValue(Constants.KEY_FILE_NAME, module.FileName);
 
                 if (module.Standalone)
                 {
-                    Shell.WriteKeyValue("Standalone", module.Standalone);
+                    Shell.WriteKeyValue(Constants.KEY_STANDALONE, module.Standalone);
+                    Shell.WriteKeyValue(Constants.KEY_SELECTOR, module.Selector);
+                    Shell.WriteKeyValue(Constants.KEY_ROUTED, module.Routed);
 
                     if (module.Routed)
                     {
-                        Shell.WriteKeyValue("Routed", module.Routed);
-                        Shell.WriteKeyValue("RoutePath", module.RoutePath);
+                        Shell.WriteKeyValue(Constants.KEY_ROUTE_PATH, module.RoutePath);
                     }
-
-                    if (module.Parents != null && module.Parents.Count > 0)
+                    else if (module.Parents != null && module.Parents.Count > 0)
                     {
-                        Shell.WriteKey("\tParents:");
+                        Shell.WriteKey($"\t{Constants.KEY_PARENTS}");
                         foreach (var parent in module.Parents)
                         {
-                            Shell.WriteKeyValue("\t\tName", parent.Name);
-                            Shell.WriteKeyValue("\t\tFileName", parent.FileName);
-                            Shell.WriteKeyValue("\t\tFullPath", parent.FilePath);
+                            Shell.WriteKeyValue($"\t\t{Constants.KEY_NAME}", parent.Name);
+                            Shell.WriteKeyValue($"\t\t{Constants.KEY_FILE_NAME}", parent.FileName);
+                            Shell.WriteKeyValue($"\t\t{Constants.KEY_FILE_PATH}", parent.FilePath);
                         }
                     }
                 }
 
                 if (module.Components != null)
                 {
-                    Shell.WriteKey("Components:");
+                    Shell.WriteKey(Constants.KEY_COMPONENTS);
                     foreach (var component in module.Components)
                     {
-                        Shell.WriteKeyValue("\tName", component.Name);
-                        Shell.WriteKeyValue("\tFileName", component.FileName);
-                        Shell.WriteKeyValue("\tFullPath", component.FilePath);
+                        Shell.WriteKeyValue($"\t{Constants.KEY_NAME}", component.Name);
+                        Shell.WriteKeyValue($"\t{Constants.KEY_FILE_NAME}", component.FileName);
+                        Shell.WriteKeyValue($"\t{Constants.KEY_FILE_PATH}", component.FilePath);
+                        Shell.WriteKeyValue($"\t{Constants.KEY_SELECTOR}", component.Selector);
+                        Shell.WriteKeyValue($"\t{Constants.KEY_ROUTED}", component.Routed);
 
                         if (component.Routed)
                         {
-                            Shell.WriteKeyValue("\tRouted", component.Routed);
-                            Shell.WriteKeyValue("\tRoutePath", component.RoutePath);
-                        }
-
-                        if (component.Parents != null && component.Parents.Count > 0)
+                            Shell.WriteKeyValue($"\t{Constants.KEY_ROUTE_PATH}", component.RoutePath);
+                        } 
+                        else if (component.Parents != null && component.Parents.Count > 0)
                         {
-                            Shell.WriteKey("\tParents:");
+                            Shell.WriteKey($"\t{Constants.KEY_PARENTS}");
                             foreach (var parent in component.Parents)
                             {
-                                Shell.WriteKeyValue("\t\tName", parent.Name);
-                                Shell.WriteKeyValue("\t\tFileName", parent.FileName);
-                                Shell.WriteKeyValue("\t\tFullPath", parent.FilePath);
+                                Shell.WriteKeyValue($"\t\t{Constants.KEY_NAME}", parent.Name);
+                                Shell.WriteKeyValue($"\t\t{Constants.KEY_FILE_NAME}", parent.FileName);
+                                Shell.WriteKeyValue($"\t\t{Constants.KEY_FILE_PATH}", parent.FilePath);
+                                Shell.WriteKeyValue($"\t\t{Constants.KEY_SELECTOR}", parent.Selector);
                             }
                         }
                     }
@@ -87,6 +90,26 @@ namespace ng_fate
 
                 Shell.EmptyLine();
             }
+        }
+
+        public static void PrintStats()
+        {
+            var format = Constants.VALUE_LOG_TIME_FORMAT;
+            var startString = StartTime.ToString(format);
+            var endString = EndTime.ToString(format);
+            var taken = EndTime - StartTime;
+            var takenString = $"{taken.TotalSeconds:F2} {Constants.MESSAGE_STATS_SECONDS}";
+
+            if (taken.TotalSeconds > Constants.VALUE_STATS_MAX_SECOND)
+                takenString = $"{taken.TotalMinutes:F2} {Constants.MESSAGE_STATS_MINUTES}";
+            else if (taken.TotalSeconds < Constants.VALUE_STATS_MIN_SECOND)
+                takenString = $"{taken.TotalMilliseconds:F2} {Constants.MESSAGE_STATS_MILLISECONDS}";
+
+            Shell.WriteLine($"\n{Constants.MESSAGE_STATS_START}", ConsoleColor.Yellow);
+            Shell.WriteKeyValue(Constants.KEY_STATS_START_TIME, startString);
+            Shell.WriteKeyValue(Constants.KEY_STATS_END_TIME, endString);
+            Shell.WriteKeyValue(Constants.KEY_STATS_TIME_TAKEN, takenString);
+            Shell.WriteLine(Constants.MESSAGE_STATS_END, ConsoleColor.Yellow);
         }
 
         public static async Task Save()
@@ -113,40 +136,31 @@ namespace ng_fate
                 var fileJson = $"{OutputPath!}{Constants.OUTPUT_PATH_JSON}";
                 await File.WriteAllTextAsync(fileJson, content);
             }
-
-            Shell.SetForegroundColor(ConsoleColor.Green);
-            Shell.WriteLine(Constants.MESSAGE_SUCCESS);
-            Shell.ResetColor();
         }
 
         public static async Task Run()
         {
-            await ProcessModules(ProjectPathFull);
+            await ProcessModules();
 
             await ProcessStandaloneModules();
 
             Modules = Modules.OrderBy(i => i.Standalone).ThenBy(i => i.Name).ToList();
         }
 
-        static async Task ProcessModules(string fullPath)
+        static async Task ProcessModules()
         {
-            bool isModule(string f) => f.Contains(Constants.PATTERN_MODULE_EXTENSION) && !f.Contains(Constants.PATTERN_ROUTING_MODULE);
-            var files = Directory.GetFiles(fullPath).Where(isModule);
+            var files = Directory.GetFiles(ProjectPathFull, Constants.PATTERN_MODULE_EXTENSION_WILDCARD, SearchOption.AllDirectories).ToList();
+            files = files.Where(file => !file.EndsWith(Constants.PATTERN_ROUTING_MODULE, StringComparison.OrdinalIgnoreCase)).ToList();
 
             await FeedModule(files);
-
-            var folders = Directory.GetDirectories(fullPath);
-
-            foreach (var folder in folders)
-                await ProcessModules(folder);
         }
 
         static async Task ProcessStandaloneModules()
         {
-            var files = Directory.GetFiles(ProjectPathFull, "*.component.ts", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(ProjectPathFull, Constants.PATTERN_COMPONENT_EXTENSION_WILDCARD, SearchOption.AllDirectories);
             var aloneModules = new List<string>();
 
-            var allComponents = Modules.SelectMany(module => module.Components).ToList();
+            var allComponents = GetAllComponents();
 
             foreach (var file in files)
             {
@@ -158,11 +172,23 @@ namespace ng_fate
                     aloneModules.Add(file);
             }
 
-            foreach (var aloneModule in aloneModules)
+            await FeedStandaloneModule(aloneModules);
+        }
+
+        static async Task FeedStandaloneModule(List<string> aloneModules)
+        {
+            var moduleLength = aloneModules.Count;
+
+            for (var index = 0; index < moduleLength; index++)
             {
+                var aloneModule = aloneModules[index];
+                var aloneModuleNo = index + 1;
                 var name = Path.GetFileName(aloneModule);
                 var nameNoExtension = name.Replace(Constants.EXTENSION_TS, string.Empty);
                 var routeDetail = await GetRouteStandaloneDetail(nameNoExtension);
+                var selector = await GetComponentSelector(aloneModule);
+
+                Shell.Log(string.Format(Constants.MESSAGE_LOG_STANDALONE_MODULE, aloneModuleNo, moduleLength));
 
                 var module = new Module
                 {
@@ -172,7 +198,8 @@ namespace ng_fate
                     FilePath = aloneModule,
                     Standalone = true,
                     Routed = routeDetail.Item1,
-                    RoutePath = routeDetail.Item2
+                    RoutePath = routeDetail.Item2,
+                    Selector = selector
                 };
 
                 if (!routeDetail.Item1)
@@ -182,11 +209,13 @@ namespace ng_fate
             }
         }
 
-        static async Task FeedModule(IEnumerable<string> files)
+        static async Task FeedModule(List<string> files)
         {
-            foreach (var file in files)
+            for (var index = 0; index < files.Count; index++)
             {
+                var file = files[index];
                 var fileInfo = new FileInfo(file);
+                var fileNo = index + 1;
                 var module = new Module
                 {
                     Id = Guid.NewGuid(),
@@ -195,6 +224,8 @@ namespace ng_fate
                     FilePath = fileInfo.FullName,
                 };
                 var components = new List<Component>();
+
+                Shell.Log(string.Format(Constants.MESSAGE_LOG_MODULE, fileNo, files.Count));
 
                 await FeedComponents(module, components, file);
 
@@ -215,6 +246,7 @@ namespace ng_fate
                 var fileName = GetMemberFileName(name);
                 var filePath = Utils.GetFilePath(ProjectPathFull, fileName);
                 var routeDetail = await GetRouteDetail(module.FilePath, name, filePath);
+                var selector = await GetComponentSelector(filePath);
 
                 var component = new Component
                 {
@@ -224,6 +256,7 @@ namespace ng_fate
                     FilePath = filePath,
                     Routed = routeDetail.Item1,
                     RoutePath = routeDetail.Item2,
+                    Selector = selector
                 };
 
                 if (!component.Routed)
@@ -281,6 +314,7 @@ namespace ng_fate
                     Name = GetComponentName(fileInfo.Name, Constants.EXTENSION_HTML),
                     FileName = fileInfo.Name,
                     FilePath = fileInfo.FullName,
+                    Selector = await GetComponentSelector(fileInfo.FullName.Replace(Constants.EXTENSION_HTML, Constants.EXTENSION_TS))
                 });
             }
 
@@ -312,6 +346,21 @@ namespace ng_fate
             module.Parents = module.Parents.OrderBy(i => i.Name).ToList();
         }
 
+        static async Task<string> GetComponentSelector(string filePath)
+        {
+            if (File.Exists(filePath))
+            {
+                var pattern = Constants.PATTERN_COMPONENT_SELECTOR;
+                var content = await File.ReadAllTextAsync(filePath);
+                var match = Regex.Match(content, pattern);
+
+                if (match.Success)
+                    return match.Groups[1].Value;
+            }
+
+            return string.Empty;
+        }
+
         static async Task<(bool, string)> GetRouteDetail(string modulePath, string name, string path)
         {
             (bool, string) detail;
@@ -329,7 +378,7 @@ namespace ng_fate
 
         static async Task<(bool, string)> GetRouteStandaloneDetail(string name)
         {
-            var files = Directory.GetFiles(ProjectPathFull, "*-routing.module.ts", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(ProjectPathFull, Constants.PATTERN_ROUTING_EXTENSION_WILDCARD, SearchOption.AllDirectories);
             (bool, string) detail = (false, string.Empty);
 
             foreach (var file in files)
@@ -446,7 +495,7 @@ namespace ng_fate
             }
             else
             {
-                routePattern1 = $"/{nameOrFileName}').then(";
+                routePattern1 = string.Format(Constants.PATTERN_ROUTE_COMPONENT_STANDALONE_THEN, nameOrFileName);
                 routePattern2 = routePattern1;
             }
 
@@ -459,6 +508,13 @@ namespace ng_fate
             var match = Regex.Match(value, pattern);
 
             return match.Groups[1].Value;
+        }
+
+        static List<Component> GetAllComponents()
+        {
+            return Modules
+                .Where(module => module.Components != null)
+                .SelectMany(module => module.Components).ToList();
         }
 
         static IEnumerable<string> GetSelectors(string fileName)
@@ -500,7 +556,7 @@ namespace ng_fate
 
         public static List<string> ProjectPrefixes()
         {
-            return !string.IsNullOrWhiteSpace(ProjectPrefix) ? ProjectPrefix.Split(",").Select(i => i.Trim()).ToList() : new List<string>();
+            return !string.IsNullOrWhiteSpace(ProjectPrefix) ? ProjectPrefix.Split(Constants.PATTERN_COMMA).Select(i => i.Trim()).ToList() : new List<string>();
         }
 
         public static bool IsOptionAllOrCli()

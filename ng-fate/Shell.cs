@@ -16,7 +16,7 @@
         public static void WriteKey(object? value)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(value);
+            Console.WriteLine($"{value}:");
 
             Console.ResetColor();
         }
@@ -42,9 +42,24 @@
             Console.Write(value);
         }
 
-        public static void WriteLine(object? value)
+        public static void WriteLine(object? value, ConsoleColor? color = null)
         {
+            if (color != null)
+                Console.ForegroundColor = color.Value;
+
             Console.WriteLine(value);
+
+            if (color != null)
+                Console.ResetColor();
+        }
+
+        public static void Log(object? value)
+        {
+            Console.Write($"[{DateTime.Now:hh:mm:ss:fff} ");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write($"LOG");
+            Console.ResetColor();
+            Console.WriteLine($"] {value}");
         }
 
         public static void Error(object? value)
@@ -53,6 +68,13 @@
             Console.WriteLine(value);
 
             Console.ResetColor();
+        }
+
+        public static void Finish()
+        {
+            Shell.SetForegroundColor(ConsoleColor.Green);
+            Shell.WriteLine(Constants.MESSAGE_FINISH);
+            Shell.ResetColor();
         }
 
         public static void EmptyLine()
