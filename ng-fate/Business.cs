@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace ng_fate
 {
@@ -49,12 +50,13 @@ namespace ng_fate
                     }
                     else if (module.Parents != null && module.Parents.Count > 0)
                     {
-                        Shell.WriteKey($"\t{Constants.KEY_PARENTS}");
+                        Shell.WriteKey(Constants.KEY_PARENTS);
                         foreach (var parent in module.Parents)
                         {
-                            Shell.WriteKeyValue($"\t\t{Constants.KEY_NAME}", parent.Name);
-                            Shell.WriteKeyValue($"\t\t{Constants.KEY_FILE_NAME}", parent.FileName);
-                            Shell.WriteKeyValue($"\t\t{Constants.KEY_FILE_PATH}", parent.FilePath);
+                            Shell.WriteKeyValue($"\t{Constants.KEY_NAME}", parent.Name);
+                            Shell.WriteKeyValue($"\t{Constants.KEY_FILE_NAME}", parent.FileName);
+                            Shell.WriteKeyValue($"\t{Constants.KEY_FILE_PATH}", parent.FilePath);
+                            Shell.WriteKeyValue($"\t{Constants.KEY_SELECTOR}", parent.Selector);
                         }
                     }
                 }
@@ -144,7 +146,18 @@ namespace ng_fate
 
             await ProcessStandaloneModules();
 
-            Modules = Modules.OrderBy(i => i.Standalone).ThenBy(i => i.Name).ToList();
+            OrderModules();
+        }
+
+        static void OrderModules()
+        {
+            var standalones = Modules.Where(i => i.Standalone).ToList();
+            var nonStandalones = Modules.Where(i => !i.Standalone).ToList();
+
+            standalones = standalones.OrderBy(i => !i.Routed).ThenBy(i => i.Name).ToList();
+            nonStandalones = nonStandalones.OrderBy(i => i.Name).ToList();
+
+            Modules = nonStandalones.Concat(standalones).ToList();
         }
 
         static async Task ProcessModules()
@@ -340,6 +353,7 @@ namespace ng_fate
                     Name = GetComponentName(fileInfo.Name, Constants.EXTENSION_HTML),
                     FileName = fileInfo.Name,
                     FilePath = fileInfo.FullName,
+                    Selector = await GetComponentSelector(fileInfo.FullName.Replace(Constants.EXTENSION_HTML, Constants.EXTENSION_TS))
                 });
             }
 
@@ -437,7 +451,8 @@ namespace ng_fate
         static async Task<(bool, string)> IsComponentStandalonePathExist(string routingFilePath, string fileName)
         {
             var content = await File.ReadAllTextAsync(routingFilePath);
-            var pathExist = content.Contains(Constants.PATTERN_ROUTE_COMPONENT_STANDALONE);
+            var routePattern = GetRoutePatterns(fileName, true);
+            var pathExist = content.Contains(routePattern.Item1);
             var route = string.Empty;
 
             if (pathExist)

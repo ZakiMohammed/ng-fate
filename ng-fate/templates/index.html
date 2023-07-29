@@ -40,12 +40,52 @@
             fill: #f8d7da !important;
             stroke: #dc3545 !important;
         }
+
+        html[data-bs-theme="dark"] .mermaid {
+            background-color: #121221;
+        }
+
+        html[data-bs-theme="dark"] .mermaid-module > rect {
+            fill: #051b11 !important;
+            stroke: #198754 !important;
+        }
+
+        html[data-bs-theme="dark"] .mermaid-standalone > rect {
+            fill: #cff4fc !important;
+            stroke: #0dcaf0 !important;
+        }
+
+        html[data-bs-theme="dark"] .mermaid-component > rect {
+            fill: #332701 !important;
+            stroke: #ffc107 !important;
+        }
+
+        html[data-bs-theme="dark"] .mermaid-parent > rect {
+            fill: #2c0b0e !important;
+            stroke: #dc3545 !important;
+        }
+
+        html[data-bs-theme="dark"] #mermaid-svg .label text, 
+        html[data-bs-theme="dark"] #mermaid-svg span, 
+        html[data-bs-theme="dark"] #mermaid-svg p {
+            color: #adb5bd !important;
+        }
+
+        html[data-bs-theme="dark"] #mermaid-svg .flowchart-link {
+            stroke: #adb5bd !important;
+        }
+
+        html[data-bs-theme="dark"] #flowchart-pointEnd {
+            fill: #fff !important;
+            stroke: #fff !important;
+        }
     </style>
 </head>
 <body>
     <div class="container-fluid my-4">
         <div class="row">
             <div class="col">
+                <button id="btn-theme" class="btn btn-sm btn-outline-secondary float-end"></button>
                 <h4 class="mb-4 pb-3 border-bottom">🔮NgFate - Project Report</h4>
 
                 <div id="report" hidden>
@@ -102,9 +142,15 @@
         const txtSearch = document.getElementById('search');
         const btnSearch = document.getElementById('btn-search');
         const btnCancel = document.getElementById('btn-cancel');
+        const btnTheme = document.getElementById('btn-theme');
         const ddlSearchAll = document.querySelectorAll('.dropdown-search .dropdown-item');
+        const elementHtml = document.querySelector('html');
 
         (function () {
+            btnTheme.addEventListener('click', toggleTheme);
+            
+            initTheme();
+
             if (!_modules || !_modules.length) {
                 console.log(`The fate is not decided yet!`);
                 return;
@@ -516,6 +562,31 @@
             txtSearch.value = '';
             loadModules(_modules);
             loadDiagrams(_modules);
+        }
+
+        function getTheme() {
+            return elementHtml.getAttribute('data-bs-theme');
+        }
+
+        function setTheme(theme) {
+            elementHtml.setAttribute('data-bs-theme', theme);
+            btnTheme.innerHTML = theme === 'dark' ? `☀️` : `🌙`;
+            btnTheme.title = theme === 'dark' ? `Light` : `Dark`;
+        }
+
+        function initTheme() {
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                setTheme('dark');
+            } else {
+                setTheme('light');
+            }
+        }
+
+        function toggleTheme() {
+            const theme = getTheme();
+            const newTheme = theme === 'dark' ? 'light' : 'dark';
+
+            setTheme(newTheme);
         }
     </script>
 </body>
